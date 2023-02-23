@@ -5,9 +5,9 @@ This project uses Quarkus, the Supersonic Subatomic Java Framework.
 If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
 
 ## Project premise
-Execute commanand in docker for install Postres:  docker run --rm -it -p 5432:5432 -e POSTGRES_PASSWORD=admin -e POSTGRES_USER=admin -e POSTGRES_DB=quarkus-social postgres  
-Install JDK 11.0.17
-Install Apache Maven 3.8.3
+- Execute commanand in docker for install postgres: docker run --rm -it -p 5432:5432 -e POSTGRES_PASSWORD=admin -e POSTGRES_USER=admin -e POSTGRES_DB=quarkus-social postgres  
+- Install jdk 11.0.17
+- Install apache maven 3.8.3
 
 ## Running the application in dev mode
 
