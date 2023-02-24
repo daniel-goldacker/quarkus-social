@@ -3,7 +3,6 @@ package io.github.danielgoldacker.quarkussocial.rest;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.persistence.Entity;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -14,6 +13,7 @@ import javax.validation.Validator;
 import io.github.danielgoldacker.quarkussocial.domain.model.User;
 import io.github.danielgoldacker.quarkussocial.domain.repository.UserRepository;
 import io.github.danielgoldacker.quarkussocial.rest.dto.CreateUserRequest;
+import io.github.danielgoldacker.quarkussocial.rest.dto.ResponseError;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 
 @Path("/users")
@@ -36,9 +36,8 @@ public class UserResource {
         
         Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(userRequest);
         if (!violations.isEmpty()){
-            ConstraintViolation<CreateUserRequest> erro = violations.stream().findAny().get();
-            String erroMessage = erro.getMessage();
-            return Response.status(400).entity(erroMessage).build();
+            ResponseError responseError = ResponseError.createFromValidation(violations);
+            return Response.status(400).entity(responseError).build();
         }
 
         User user = new User();
