@@ -1,28 +1,14 @@
 package io.github.danielgoldacker.quarkussocial.rest.dto;
 
+import lombok.Data;
+
+@Data
 public class FieldError {
     private String field;
     private String message;
 
-
     public FieldError(String field, String message) {
         this.field = field;
-        this.message = message;
-    }
-
-    public String getField() {
-        return this.field;
-    }
-
-    public void setField(String field) {
-        this.field = field;
-    }
-
-    public String getMessage() {
-        return this.message;
-    }
-
-    public void setMessage(String message) {
         this.message = message;
     }
 }
