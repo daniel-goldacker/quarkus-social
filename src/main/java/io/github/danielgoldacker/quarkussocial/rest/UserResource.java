@@ -1,10 +1,15 @@
 package io.github.danielgoldacker.quarkussocial.rest;
 
+import java.util.Set;
+
 import javax.inject.Inject;
+import javax.persistence.Entity;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import io.github.danielgoldacker.quarkussocial.domain.model.User;
 import io.github.danielgoldacker.quarkussocial.domain.repository.UserRepository;
@@ -17,17 +22,26 @@ import io.quarkus.hibernate.orm.panache.PanacheQuery;
 public class UserResource {
 
    private UserRepository repository;
+   private Validator validator;
 
     @Inject
-    public UserResource(UserRepository repository){
+    public UserResource(UserRepository repository, Validator validator){
         this.repository = repository;
+        this.validator = validator;
     }
     
     @POST
     @Transactional
     public Response createUsers(CreateUserRequest userRequest){
+        
+        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(userRequest);
+        if (!violations.isEmpty()){
+            ConstraintViolation<CreateUserRequest> erro = violations.stream().findAny().get();
+            String erroMessage = erro.getMessage();
+            return Response.status(400).entity(erroMessage).build();
+        }
+
         User user = new User();
-      
         user.setName(userRequest.getName());
         user.setAge(userRequest.getAge());
 
