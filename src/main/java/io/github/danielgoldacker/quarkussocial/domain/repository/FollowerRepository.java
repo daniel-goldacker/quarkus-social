@@ -31,4 +31,13 @@ public class FollowerRepository implements PanacheRepository<Follower> {
         
         return query.list();
     }
+
+    public void deleteByFollowerAndUser(Long followerId, Long userId) {
+
+        Map<String, Object> param = new HashMap<>();
+        param.put("followerId", followerId);
+        param.put("userId", userId);
+
+        delete("follower.id  = :followerId and user.id = :userId", param);
+    }
 }

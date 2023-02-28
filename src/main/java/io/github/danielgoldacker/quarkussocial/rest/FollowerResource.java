@@ -13,11 +13,13 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -79,5 +81,19 @@ public class FollowerResource {
       var followersList = list.stream().map(fol -> new FollowerResponse(fol)).collect(Collectors.toList());
       responseObject.setFollower(followersList);
       return Response.ok(responseObject).build();
+    }
+
+    @DELETE
+    @Transactional
+    public Response unfollowUser(@PathParam("userId") Long userId, @QueryParam("followerId") Long followerId){
+
+      User user = userRepository.findById(userId);
+      if (user == null) {
+          return Response.status(Response.Status.NOT_FOUND).build();
+      }
+
+      repository.deleteByFollowerAndUser(followerId, userId);
+
+      return Response.status(Response.Status.NO_CONTENT).build();
     }
 }
