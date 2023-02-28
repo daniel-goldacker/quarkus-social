@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.Response;
 
 import io.github.danielgoldacker.quarkussocial.domain.model.Post;
 import io.github.danielgoldacker.quarkussocial.domain.model.User;
+import io.github.danielgoldacker.quarkussocial.domain.repository.FollowerRepository;
 import io.github.danielgoldacker.quarkussocial.domain.repository.PostRepository;
 import io.github.danielgoldacker.quarkussocial.domain.repository.UserRepository;
 import io.github.danielgoldacker.quarkussocial.rest.dto.CreatePostRequest;
@@ -27,13 +29,15 @@ import io.quarkus.panache.common.Sort;
 @Produces(MediaType.APPLICATION_JSON)
 public class PostResource {
 
-  private UserRepository userRepository;
   private PostRepository repository;
+  private UserRepository userRepository;
+  private FollowerRepository followerRepository;
 
   @Inject
-  public PostResource(UserRepository userRepository, PostRepository repository) {
-    this.userRepository = userRepository;
+  public PostResource(PostRepository repository, UserRepository userRepository, FollowerRepository followerRepository ) {
     this.repository = repository;
+    this.userRepository = userRepository;
+    this.followerRepository = followerRepository;
   }
 
     
@@ -55,18 +59,31 @@ public class PostResource {
     }
 
     @GET
-    public Response listPost(@PathParam("userId") Long userId){
+    public Response listPost(@PathParam("userId") Long userId, @HeaderParam("followerId") Long followeId){
+      if (followeId  == null) {
+        return Response.status(Response.Status.BAD_REQUEST).entity("you forgot the header followerId.").build();
+      } 
+      
       User user = userRepository.findById(userId);
-
-      if (user != null) {
-        PanacheQuery<Post> query = repository.find("user", Sort.by("dateTime", Sort.Direction.Descending),user);
-        var list = query.list();
-        var postResponseList = list.stream().map(pos ->PostResponse.fromEntity(pos)).collect(Collectors.toList());
-
-        return Response.ok(postResponseList).build();
-      } else {
+      if (user == null) {
         return Response.status(Response.Status.NOT_FOUND).build();
+      } 
+
+      User follower = userRepository.findById(followeId);
+      if (follower  == null) {
+        return Response.status(Response.Status.BAD_REQUEST).entity("inexistent followerId.").build();
+      } 
+
+      boolean follows = followerRepository.follows(user, follower);
+      if (!follows){
+        return Response.status(Response.Status.FORBIDDEN).entity("you can't see these posts").build();  
       }
+
+      PanacheQuery<Post> query = repository.find("user", Sort.by("dateTime", Sort.Direction.Descending),user);
+      var list = query.list();
+      var postResponseList = list.stream().map(pos ->PostResponse.fromEntity(pos)).collect(Collectors.toList());
+
+      return Response.ok(postResponseList).build();
     }
 }
 
