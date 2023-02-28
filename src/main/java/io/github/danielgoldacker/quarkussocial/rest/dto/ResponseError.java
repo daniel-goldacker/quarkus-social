@@ -20,8 +20,7 @@ public class ResponseError {
         this.message = message;
         this.errors = errors;
     }
-
-
+    
     public static <T> ResponseError createFromValidation(Set<ConstraintViolation<T>>  violations){
         List<FieldError> errors = violations.stream().map(cv -> new FieldError(cv.getPropertyPath().toString(), cv.getMessage())).collect(Collectors.toList());
         String message = "Validation error";

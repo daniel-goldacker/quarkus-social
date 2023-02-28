@@ -1,6 +1,7 @@
 package io.github.danielgoldacker.quarkussocial.rest;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 
 import io.github.danielgoldacker.quarkussocial.domain.model.Follower;
@@ -35,6 +36,10 @@ public class FollowerResource {
     @Transactional
     public Response followUser(@PathParam("userId") Long userId, FollowerRequest request){
       User user = userRepository.findById(userId);
+
+      if (userId.equals(request.getFollowerId())){
+        return Response.status(Response.Status.CONFLICT).entity("you can't follow yourself").build();
+      }
 
       if (user == null) {
           return Response.status(Response.Status.NOT_FOUND).build();
